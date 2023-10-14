@@ -1,0 +1,204 @@
+.container {
+	--_transition-duration: 0.5s;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+	width: 100%;
+
+	position: absolute;
+	top: 0;
+	left: 0;
+
+	background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal {
+	display: flex;
+	flex-direction: column;
+	min-width: 50%;
+	min-height: 50%;
+	max-width: 70%;
+	max-height: 90%;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	-o-border-radius: 5px;
+	z-index: 1000;
+	isolation: isolate;
+	animation: modal var(--_transition-duration) ease-in-out;
+	-webkit-animation: modal var(--_transition-duration) ease-in-out;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px;
+}
+
+.modal > div:first-child {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 50%;
+	padding-bottom: 1em;
+}
+
+.modal > div > button {
+	--_button-padding: 10px;
+
+	width: 70%;
+	padding: var(--_button-padding);
+	border-radius: 5px;
+	background-color: var(--primary-bg-color);
+	color: var(--primary-color);
+	border: none;
+	font-size: 1.2rem;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+
+	overflow: hidden;
+
+	position: relative;
+	isolation: isolate;
+}
+
+.modal > div > button > * {
+	z-index: 2;
+}
+
+.arrow {
+	width: 40px;
+	height: 40px;
+	transition: transform var(--_transition-duration) ease-in-out;
+	-webkit-transition: transform var(--_transition-duration) ease-in-out;
+	-moz-transition: transform var(--_transition-duration) ease-in-out;
+	-ms-transition: transform var(--_transition-duration) ease-in-out;
+	-o-transition: transform var(--_transition-duration) ease-in-out;
+	transform: translateX(0) rotate(0deg);
+	-webkit-transform: translateX(0) rotate(0deg);
+	-moz-transform: translateX(0) rotate(0deg);
+	-ms-transform: translateX(0) rotate(0deg);
+	-o-transform: translateX(0) rotate(0deg);
+}
+
+.modal > div > button:hover .arrow {
+	transform: translateX(calc(var(--_button-padding) - 5px)) rotate(360deg);
+	-webkit-transform: translateX(calc(var(--_button-padding) - 5px))
+		rotate(360deg);
+	-moz-transform: translateX(calc(var(--_button-padding) - 5px)) rotate(360deg);
+	-ms-transform: translateX(calc(var(--_button-padding) - 5px)) rotate(360deg);
+	-o-transform: translateX(calc(var(--_button-padding) - 5px)) rotate(360deg);
+}
+
+.modal > div > button::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background-color: black;
+	opacity: 0;
+	transition: opacity var(--_transition-duration) ease-in-out;
+	-webkit-transition: opacity var(--_transition-duration) ease-in-out;
+	-moz-transition: opacity var(--_transition-duration) ease-in-out;
+	-ms-transition: opacity var(--_transition-duration) ease-in-out;
+	-o-transition: opacity var(--_transition-duration) ease-in-out;
+}
+
+.modal > div > button:hover::before {
+	opacity: 0.3;
+}
+
+@keyframes modal {
+	0% {
+		opacity: 0;
+		transform: scale(0.5);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.links {
+	display: flex;
+	flex-direction: row;
+	gap: 30px;
+	justify-content: center;
+	width: 100%;
+}
+
+.links > a {
+	text-decoration: none;
+	border-radius: 15px;
+	-webkit-border-radius: 15px;
+	-moz-border-radius: 15px;
+	-ms-border-radius: 15px;
+	-o-border-radius: 15px;
+	display: flex;
+	flex-direction: column;
+	align-items: start;
+	color: var(--fg-color);
+	transition: background-color var(--_transition-duration) ease-in-out;
+	-webkit-transition: background-color var(--_transition-duration) ease-in-out;
+	-moz-transition: background-color var(--_transition-duration) ease-in-out;
+	-ms-transition: background-color var(--_transition-duration) ease-in-out;
+	-o-transition: background-color var(--_transition-duration) ease-in-out;
+	padding: 15px 30px;
+	text-align: left;
+}
+
+.links > a:hover,
+.links > a:focus {
+	background-color: var(--bg-bg-color);
+	color: var(--bg-color);
+}
+
+.links > a:active {
+	scale: 0.98;
+}
+
+.links > a > div {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.links > a:hover > div .arrow {
+	transform: translateX(10px);
+	-webkit-transform: translateX(10px);
+	-moz-transform: translateX(10px);
+	-ms-transform: translateX(10px);
+	-o-transform: translateX(10px);
+}
+
+.none {
+	animation: out 0.1s ease-in forwards;
+	-webkit-animation: out 0.1s ease-in forwards;
+}
+
+.none_modal {
+	animation: modalOut 0.1s ease-in forwards;
+	-webkit-animation: modalOut 0.1s ease-in forwards;
+}
+
+@keyframes out {
+	from {
+	}
+	to {
+		display: none;
+	}
+}
+
+@keyframes modalOut {
+	from {
+		scale: 1;
+	}
+	to {
+		scale: 0.7;
+		display: none;
+	}
+}
