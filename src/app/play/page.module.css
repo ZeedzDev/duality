@@ -1,0 +1,22 @@
+.playPage {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	gap: 1em;
+	flex-wrap: wrap;
+}
+
+.section {
+	display: flex;
+	flex-direction: column;
+	padding: 16px;
+	border-radius: 19px;
+	-webkit-border-radius: 19px;
+	-moz-border-radius: 19px;
+	-ms-border-radius: 19px;
+	-o-border-radius: 19px;
+	max-width: min(600px, 90vw);
+	width: fit-content;
+	max-height: 75vh;
+	overflow: auto;
+}

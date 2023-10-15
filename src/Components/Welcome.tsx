@@ -1,42 +1,81 @@
 'use client';
 import * as React from 'react';
 import styles from '../Styles/WelcomeStyles.module.css';
+import { cookies } from 'next/headers';
 
-export const Welcome = () => {
-	const [welcomed, setWelcomed] = React.useState(false);
+export const Welcome = ({ cookieWelcomed }: { cookieWelcomed: boolean }) => {
+	const [welcomed, setWelcomed] = React.useState(cookieWelcomed);
+	const [width, setWidth] = React.useState(window.innerWidth);
 
-	return (
-		<div className={`${welcomed && styles.none} ${styles.container}`}>
-			<div className={`fg ${styles.modal} ${welcomed && styles.none_modal}`}>
-				<div>
-					<h1>👋</h1>
-					<h1>Welcome to Duality</h1>
-					<h2>What will your life be?</h2>
+	const largestWidth = 700;
 
-					<button onClick={() => setWelcomed(true)}>
-						<p>Give it a shot</p> <Arrow />
-					</button>
-				</div>
-				<div className={styles.links}>
-					<a href='/wiki'>
-						<div>
-							<h1>Wiki</h1>
-							<LinkArrow />
-						</div>
-						<p>Learn about the game, how it works, and the tech behind it</p>
-					</a>
-					<a href='/quick-start'>
-						<div>
-							<h1>Quick Start Guide</h1>
-							<LinkArrow />
-						</div>
-						<p>{`Get into the game and don't worry about any of the maths powering the game 🤓🤓`}</p>
-					</a>
+	React.useEffect(() => {
+		const handleResize = () => {
+			return setWidth(window.innerWidth);
+		};
+		window.addEventListener('resize', handleResize);
+
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
+	if (cookieWelcomed) {
+		if (width < largestWidth) return <MobileView />;
+		else return <></>;
+	}
+	if (width >= largestWidth)
+		return (
+			<div className={`${welcomed ? styles.none : ''} ${styles.container}`}>
+				<div className={`fg ${styles.modal} ${welcomed && styles.none_modal}`}>
+					<div>
+						<h1>👋</h1>
+						<h1>Welcome to Duality</h1>
+						<h2>What will your life be?</h2>
+
+						<button
+							onClick={async () => {
+								setWelcomed(true);
+								await fetch('/api/welcomed', { method: 'POST' });
+								window.location.pathname = '/play';
+							}}
+						>
+							<p>Give it a shot</p> <Arrow />
+						</button>
+					</div>
+					<div className={styles.links}>
+						<a href='/wiki'>
+							<div>
+								<h1>Wiki</h1>
+								<LinkArrow />
+							</div>
+							<p>Learn about the game, how it works, and the tech behind it</p>
+						</a>
+						<a href='/quick-start'>
+							<div>
+								<h1>Quick Start Guide</h1>
+								<LinkArrow />
+							</div>
+							<p>{`Get into the game and don't worry about any of the maths powering it`}</p>
+						</a>
+					</div>
 				</div>
 			</div>
-		</div>
-	);
+		);
+	else return <MobileView />;
 };
+
+const MobileView = () => (
+	<div className={`${styles.container}`}>
+		<div className={`fg ${styles.modal}`}>
+			<div>
+				<h1>👋</h1>
+				<h1>Welcome to Duality</h1>
+				<p>
+					Unfortunately, we currently do not support mobile view. Head over to a
+					PC and play!
+				</p>
+			</div>
+		</div>
+	</div>
+);
 
 const Arrow = () => (
 	<svg

@@ -7,14 +7,42 @@
 
 	--primary-bg-color: #9442e1;
 	--primary-color: white;
+
+	--primary-bg-color-opacity: rgb(148, 66, 225, 0.5);
+}
+
+body {
+	padding: 0;
+	margin: 0;
 }
 
 .bg {
-	background-color: var(--bg-color);
+	background-color: var(--bg-bg-color);
 	color: var(--bg-color);
 }
 
 .fg {
 	background-color: var(--fg-bg-color);
 	color: var(--fg-color);
+}
+
+.pageBg {
+	height: 100%;
+	min-height: calc(100vh - 20px);
+	padding-top: 10px;
+}
+
+::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	background-color: var(--primary-bg-color-opacity);
+	opacity: 0.5;
 }

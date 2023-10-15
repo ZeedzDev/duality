@@ -1,0 +1,14 @@
+.balanceContainer {
+	width: 100%;
+}
+
+.balance {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.balance > :first-child {
+	margin-right: 1em;
+}
