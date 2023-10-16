@@ -1,13 +1,36 @@
+import * as React from 'react';
 import { Currency, Item, OwnedItem } from '@/Types';
 import styles from '../Styles/OwnedItemsStyles.module.css';
 import Image from 'next/image';
+import { addOwnedItem, itemBuyable, sellOwnedItem } from '@/Utils';
 
 type Params = {
 	item: Item | OwnedItem;
 	playStyles: { readonly [key: string]: string };
+	type: 'owned' | 'shop';
+	balance: number[];
+	setBalance: React.Dispatch<React.SetStateAction<number[]>>;
+	setOwnedItems: React.Dispatch<React.SetStateAction<OwnedItem[]>>;
+	ownedItems: OwnedItem[];
 };
 
-const ItemComponent = ({ item, playStyles }: Params) => {
+const ItemComponent = ({
+	item,
+	playStyles,
+	type,
+	balance,
+	setBalance,
+	setOwnedItems,
+	ownedItems,
+}: Params) => {
+	const buyable = itemBuyable({ item, balance });
+
+	const onBuy = () =>
+		addOwnedItem({ item, ownedItems, balance, setBalance, setOwnedItems });
+
+	const onSell = () =>
+		sellOwnedItem({ item, ownedItems, setOwnedItems, setBalance, balance });
+
 	return (
 		<div className={`${styles.ownedItem}`}>
 			<div className={`${styles.firstRow}`}>
@@ -29,13 +52,23 @@ const ItemComponent = ({ item, playStyles }: Params) => {
 				</div>
 			</div>
 			<div className={`${styles.buttonGroup}`}>
-				<button className={`${styles.button} ${styles.sellButton}`}>
-					{item.currency === Currency.MONEY
-						? process.env.NEXT_PUBLIC_CURRENCY_MONEY
-						: process.env.NEXT_PUBLIC_CURRENCY_POINTS}
-					{item.sell}
-				</button>
-				<button className={`${styles.button} ${styles.buyButton}`}>
+				{type === 'owned' && (
+					<button
+						className={`${styles.button} ${styles.sellButton}`}
+						onClick={onSell}
+					>
+						{item.currency === Currency.MONEY
+							? process.env.NEXT_PUBLIC_CURRENCY_MONEY
+							: process.env.NEXT_PUBLIC_CURRENCY_POINTS}
+						{item.sell}
+					</button>
+				)}
+				<button
+					disabled={!buyable}
+					aria-disabled={!buyable}
+					className={`${styles.button} ${styles.buyButton}`}
+					onClick={onBuy}
+				>
 					{item.currency === Currency.MONEY
 						? process.env.NEXT_PUBLIC_CURRENCY_MONEY
 						: process.env.NEXT_PUBLIC_CURRENCY_POINTS}

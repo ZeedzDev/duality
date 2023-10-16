@@ -1,4 +1,4 @@
-import { ActionPublic, Item } from '@/Types';
+import { ActionPublic, Item, OwnedItem } from '@/Types';
 import * as React from 'react';
 import styles from '../Styles/ActionsStyles.module.css';
 import Skeleton from 'react-loading-skeleton';
@@ -8,8 +8,22 @@ type Params = {
 	action: ActionPublic;
 	itemsData?: Item[];
 	itemsIsLoading: boolean;
+	cooldowns: Map<string, Date>;
+	ownedItems: OwnedItem[];
 };
-const Action = ({ action, itemsData, itemsIsLoading }: Params) => {
+const Action = ({
+	action,
+	itemsData,
+	itemsIsLoading,
+	cooldowns,
+	ownedItems,
+}: Params) => {
+	const cooldown = cooldowns.get(action.id);
+
+	const workable =
+		(!cooldown || cooldown >= new Date()) &&
+		action.required_items.find((i) => !ownedItems.find((it) => it.id === i));
+
 	return (
 		<div className={`${styles.action}`}>
 			<div>
@@ -18,7 +32,7 @@ const Action = ({ action, itemsData, itemsIsLoading }: Params) => {
 					<Arrow />
 					{action.description}
 				</p>
-				<p className={`${styles.actionDescription} ${styles.requires}`}>
+				<div className={`${styles.actionDescription} ${styles.requires}`}>
 					<div>
 						<Arrow />
 						Requires
@@ -28,12 +42,13 @@ const Action = ({ action, itemsData, itemsIsLoading }: Params) => {
 							<Skeleton />
 						) : (
 							action.required_items?.map((item) => {
-								console.log(itemsData);
 								const fetchedItem = itemsData?.find((i) => i.id === item);
-								console.log(fetchedItem);
 								if (!fetchedItem)
 									return (
-										<div className={`${styles.requiredItem}`}>
+										<div
+											key={`required_item_${action.id}_${item}`}
+											className={`${styles.requiredItem}`}
+										>
 											<Arrow />
 											{item}
 										</div>
@@ -58,10 +73,10 @@ const Action = ({ action, itemsData, itemsIsLoading }: Params) => {
 							})
 						)}
 					</div>
-				</p>
+				</div>
 			</div>
 			<div className={`${styles.buttonDiv}`}>
-				<button className={`${styles.button}`}>
+				<button className={`${styles.button}`} disabled={!workable}>
 					{action?.category ? action.category[0].toUpperCase() : ''}
 					{action?.category?.slice(1)}
 				</button>

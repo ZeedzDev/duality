@@ -12,7 +12,7 @@ import { HotKeys } from 'react-hotkeys';
 export default function Play() {
 	const [ownedItems, setOwnedItems] = React.useState<OwnedItem[]>([
 		{
-			id: '203123',
+			id: 'rifle',
 			name: 'Rifle',
 			type: ItemType.EQUIPMENT,
 			buy: 700,
@@ -22,7 +22,7 @@ export default function Play() {
 			quantity: 3,
 		},
 		{
-			id: '203122',
+			id: 'shovel',
 			name: 'Shovel',
 			type: ItemType.EQUIPMENT,
 			buy: 150,
@@ -32,7 +32,7 @@ export default function Play() {
 			quantity: 1,
 		},
 		{
-			id: '203121',
+			id: 'fishing_rod',
 			name: 'Fishing Rod',
 			type: ItemType.EQUIPMENT,
 			buy: 400,
@@ -42,7 +42,7 @@ export default function Play() {
 			quantity: 5,
 		},
 	]);
-	const [balance, setBalance] = React.useState<number[]>([1000, 0]);
+	const [balance, setBalance] = React.useState<number[]>([10000, 0]);
 
 	const ownedItemsRef = React.useRef<HTMLInputElement>(null);
 	const shopRef = React.useRef<HTMLInputElement>(null);
@@ -69,6 +69,15 @@ export default function Play() {
 		},
 	};
 
+	React.useEffect(() => {
+		console.log(
+			'8888b.  88   88    db    88     88 888888 Yb  dP\n8I  Yb 88   88   dPYb   88     88   88    YbdP\n8I  dY Y8   8P  dP__Yb  88     88   88     8P\n8888Y"  `YbodP' +
+				`' dP""""Yb 88ood8 88   88    dP`
+		);
+	}, []);
+
+	const cooldowns = new Map<string, Date>();
+
 	return (
 		<>
 			<HotKeys keyMap={keyMap} handlers={handlers} allowChanges>
@@ -76,10 +85,28 @@ export default function Play() {
 					<Balance {...{ balance, playStyles: styles }} />
 					<OwnedItems
 						ref={ownedItemsRef}
-						{...{ ownedItems, playStyles: styles }}
+						{...{
+							ownedItems,
+							playStyles: styles,
+							balance,
+							setOwnedItems,
+							setBalance,
+						}}
 					/>
-					<Shop ref={shopRef} {...{ playStyles: styles }} />
-					<Actions ref={actionsRef} {...{ playStyles: styles }} />
+					<Shop
+						ref={shopRef}
+						{...{
+							playStyles: styles,
+							balance,
+							setOwnedItems,
+							ownedItems,
+							setBalance,
+						}}
+					/>
+					<Actions
+						ref={actionsRef}
+						{...{ playStyles: styles, ownedItems, cooldowns }}
+					/>
 				</div>
 			</HotKeys>
 		</>

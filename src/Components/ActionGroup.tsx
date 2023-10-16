@@ -1,4 +1,4 @@
-import { ActionGroup as ActionGroupType, Item } from '@/Types';
+import { ActionGroup as ActionGroupType, Item, OwnedItem } from '@/Types';
 import * as React from 'react';
 import styles from '../Styles/ActionsStyles.module.css';
 import Action from './Action';
@@ -8,6 +8,8 @@ type Params = {
 	search: string;
 	itemsData?: Item[];
 	itemsIsLoading: boolean;
+	cooldowns: Map<string, Date>;
+	ownedItems: OwnedItem[];
 };
 
 const ActionGroupComponent = ({
@@ -15,6 +17,8 @@ const ActionGroupComponent = ({
 	search,
 	itemsData,
 	itemsIsLoading,
+	cooldowns,
+	ownedItems,
 }: Params) => {
 	const [collapsed, setCollapsed] = React.useState(true);
 
@@ -47,12 +51,28 @@ const ActionGroupComponent = ({
 								)
 								.map((action) => (
 									<div key={`action_${actionGroup.id}_${action.id}`}>
-										<Action {...{ action, itemsData, itemsIsLoading }} />
+										<Action
+											{...{
+												action,
+												itemsData,
+												itemsIsLoading,
+												cooldowns,
+												ownedItems,
+											}}
+										/>
 									</div>
 								))
 						: actionGroup.actions.map((action) => (
 								<div key={`action_${actionGroup.id}_${action.id}`}>
-									<Action {...{ action, itemsData, itemsIsLoading }} />
+									<Action
+										{...{
+											action,
+											itemsData,
+											itemsIsLoading,
+											cooldowns,
+											ownedItems,
+										}}
+									/>
 								</div>
 						  ))}
 				</div>

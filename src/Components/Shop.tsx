@@ -1,7 +1,7 @@
 'use client';
 import * as React from 'react';
 import SearchPill from './SearchPill';
-import { Item } from '@/Types';
+import { Item, OwnedItem } from '@/Types';
 import useSWR from 'swr';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -10,13 +10,17 @@ import styles from '../Styles/ShopStyles.module.css';
 
 type Params = {
 	playStyles: { readonly [key: string]: string };
+	balance: number[];
+	setOwnedItems: React.Dispatch<React.SetStateAction<OwnedItem[]>>;
+	ownedItems: OwnedItem[];
+	setBalance: React.Dispatch<React.SetStateAction<number[]>>;
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 const itemsFetched = (url: string) => fetcher(url).then((res) => res.items);
 
 const Shop = React.forwardRef<HTMLInputElement, Params>(
-	({ playStyles }, ref) => {
+	({ playStyles, balance, setOwnedItems, ownedItems, setBalance }, ref) => {
 		const { data, error, isLoading } = useSWR('/api/items', itemsFetched);
 
 		const [search, setSearch] = React.useState<string>('');
@@ -58,18 +62,32 @@ const Shop = React.forwardRef<HTMLInputElement, Params>(
 		if (error) return <div>Failed to load</div>;
 
 		return (
-			<section className={`fg ${playStyles.section} ${styles.itemsContainer}`}>
+			<section
+				className={`fg ${playStyles.section} ${styles.itemsContainer} ${styles.overflow}`}
+			>
 				<SearchPill
 					ref={ref}
 					value={search}
 					setValue={setSearch}
 					placeholder='Search for shop items'
 				/>
-				{filteredItems?.map((item: Item) => (
-					<div key={`shop_item_${item.id}`}>
-						<ItemComponent {...{ item, playStyles }} />
-					</div>
-				))}
+				<div className={`${styles.itemsContainer}`}>
+					{filteredItems?.map((item: Item) => (
+						<div key={`shop_item_${item.id}`}>
+							<ItemComponent
+								{...{
+									item,
+									playStyles,
+									type: 'shop',
+									balance,
+									ownedItems,
+									setBalance,
+									setOwnedItems,
+								}}
+							/>
+						</div>
+					))}
+				</div>
 			</section>
 		);
 	}

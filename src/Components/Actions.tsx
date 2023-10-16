@@ -4,13 +4,15 @@ import styles from '../Styles/ActionsStyles.module.css';
 import SearchPill from './SearchPill';
 import Skeleton from 'react-loading-skeleton';
 import useSWR from 'swr';
-import { ActionGroup } from '@/Types';
+import { ActionGroup, OwnedItem } from '@/Types';
 import ActionGroupComponent from './ActionGroup';
 
 type Params = {
 	playStyles: {
 		readonly [key: string]: string;
 	};
+	cooldowns: Map<string, Date>;
+	ownedItems: OwnedItem[];
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -18,7 +20,7 @@ const actionsFetched = (url: string) => fetcher(url).then((res) => res.actions);
 const itemsFetched = (url: string) => fetcher(url).then((res) => res.items);
 
 const Actions = React.forwardRef<HTMLInputElement, Params>(
-	({ playStyles }, ref) => {
+	({ playStyles, cooldowns, ownedItems }, ref) => {
 		const itemsSWR = useSWR(`/api/items`, itemsFetched);
 		const itemsData = itemsSWR.data;
 		const itemsError = itemsSWR.error;
@@ -73,20 +75,31 @@ const Actions = React.forwardRef<HTMLInputElement, Params>(
 		if (error) return <div>Failed to load</div>;
 
 		return (
-			<div className={`fg ${playStyles.section} ${styles.actionsContainer}`}>
+			<div
+				className={`fg ${playStyles.section} ${styles.actionsContainer} ${styles.overflow}`}
+			>
 				<SearchPill
 					value={search}
 					setValue={setSearch}
 					placeholder='Search for actions'
 					ref={ref}
 				/>
-				{filteredActions?.map((actionGroup) => (
-					<div key={`actions_${actionGroup.id}`}>
-						<ActionGroupComponent
-							{...{ actionGroup, search, itemsData, itemsIsLoading }}
-						/>
-					</div>
-				))}
+				<div className={`${styles.actionsContainer}`}>
+					{filteredActions?.map((actionGroup) => (
+						<div key={`actions_${actionGroup.id}`}>
+							<ActionGroupComponent
+								{...{
+									actionGroup,
+									search,
+									itemsData,
+									itemsIsLoading,
+									cooldowns,
+									ownedItems,
+								}}
+							/>
+						</div>
+					))}
+				</div>
 			</div>
 		);
 	}

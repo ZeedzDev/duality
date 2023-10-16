@@ -8,10 +8,13 @@ import ItemComponent from './Item';
 type OwnedItemsProps = {
 	ownedItems: OwnedItem[];
 	playStyles: { readonly [key: string]: string };
+	balance: number[];
+	setBalance: React.Dispatch<React.SetStateAction<number[]>>;
+	setOwnedItems: React.Dispatch<React.SetStateAction<OwnedItem[]>>;
 };
 
 const OwnedItems = React.forwardRef<HTMLInputElement, OwnedItemsProps>(
-	({ ownedItems, playStyles }, ref) => {
+	({ ownedItems, playStyles, balance, setBalance, setOwnedItems }, ref) => {
 		const [search, setSearch] = React.useState<string>('');
 
 		const [filteredItems, setFilteredItems] =
@@ -29,7 +32,7 @@ const OwnedItems = React.forwardRef<HTMLInputElement, OwnedItemsProps>(
 
 		return (
 			<section
-				className={`fg ${playStyles.section} ${styles.ownedItemsContainer}`}
+				className={`fg ${playStyles.section} ${styles.ownedItemsContainer} ${styles.overflow}`}
 			>
 				<SearchPill
 					ref={ref}
@@ -39,11 +42,23 @@ const OwnedItems = React.forwardRef<HTMLInputElement, OwnedItemsProps>(
 						placeholder: 'Search for owned items',
 					}}
 				/>
-				{filteredItems.map((ownedItem) => (
-					<div key={`owned_item_${ownedItem.id}`}>
-						<ItemComponent {...{ item: ownedItem, playStyles }} />
-					</div>
-				))}
+				<div className={`${styles.ownedItemsContainer}`}>
+					{filteredItems.map((ownedItem) => (
+						<div key={`owned_item_${ownedItem.id}`}>
+							<ItemComponent
+								{...{
+									item: ownedItem,
+									playStyles,
+									type: 'owned',
+									balance,
+									ownedItems,
+									setBalance,
+									setOwnedItems,
+								}}
+							/>
+						</div>
+					))}
+				</div>
 			</section>
 		);
 	}
