@@ -48,7 +48,7 @@ const items: Item[] = [
 		buy: 900,
 		sell: 0,
 		currency: Currency.MONEY,
-		iconUrl: '/icons/items/economics_degree',
+		iconUrl: '/icons/items/economics_degree.png',
 	},
 	{
 		id: "education_degree_high",
@@ -57,7 +57,7 @@ const items: Item[] = [
 		buy: 600,
 		sell: 0,
 		currency: Currency.MONEY,
-		iconUrl: "/icons/items/education_degree_high",
+		iconUrl: "/icons/items/education_degree_high.png",
 	},
 	{
 		id: "education_degree_primary",
@@ -66,7 +66,7 @@ const items: Item[] = [
 		buy: 500,
 		sell: 0,
 		currency: Currency.MONEY,
-		iconUrl: "/icons/items/education_degree_primary",
+		iconUrl: "/icons/items/education_degree_primary.png",
 	},
 	{
 		id: "education_degree_university",
@@ -75,7 +75,7 @@ const items: Item[] = [
 		buy: 900,
 		sell: 0,
 		currency: Currency.MONEY,
-		iconUrl: "/icons/items/education_degree_university",
+		iconUrl: "/icons/items/education_degree_university.png",
 	},
 	{
 		id: "law_degree",
@@ -84,7 +84,7 @@ const items: Item[] = [
 		buy: 1000,
 		sell: 0,
 		currency: Currency.MONEY,
-		iconUrl: "/icons/items/law_degree",
+		iconUrl: "/icons/items/law_degree.png",
 	},
 	{
 		id: "psychology_degree",
@@ -93,6 +93,6 @@ const items: Item[] = [
 		buy: 700,
 		sell: 0,
 		currency: Currency.MONEY,
-		iconUrl: "/icons/items/law_degree",
+		iconUrl: "/icons/items/law_degree.png",
 	}
 ];
