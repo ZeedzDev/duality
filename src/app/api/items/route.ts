@@ -39,7 +39,7 @@ const items: Item[] = [
 		buy: 500,
 		sell: 0,
 		currency: Currency.MONEY,
-		iconUrl: '/icons/items/computer_science_degree.png"
+		iconUrl: '/icons/items/computer_science_degree.png',
 	},
 	{
 		id: "economics_degree",
@@ -48,7 +48,7 @@ const items: Item[] = [
 		buy: 900,
 		sell: 0,
 		currency: Currency.MONEY,
-		iconUrl: '/icons/items/economics_degree",
+		iconUrl: '/icons/items/economics_degree',
 	},
 	{
 		id: "education_degree_high",
