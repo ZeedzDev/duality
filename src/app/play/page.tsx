@@ -8,6 +8,8 @@ import Balance from '@/Components/Balance';
 import Shop from '@/Components/Shop';
 import Actions from '@/Components/Actions';
 import { HotKeys } from 'react-hotkeys';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Play() {
 	const [ownedItems, setOwnedItems] = React.useState<OwnedItem[]>([
@@ -109,6 +111,18 @@ export default function Play() {
 					/>
 				</div>
 			</HotKeys>
+			<ToastContainer
+				position='bottom-left'
+				autoClose={10000}
+				hideProgressBar={false}
+				toastStyle={{
+					maxWidth: '480px',
+					width: '100%',
+					backgroundColor: 'var(--bg-bg-color)',
+					color: 'var(--bg-text-color)',
+				}}
+				closeOnClick
+			/>
 		</>
 	);
 }

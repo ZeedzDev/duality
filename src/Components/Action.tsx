@@ -3,6 +3,8 @@ import * as React from 'react';
 import styles from '../Styles/ActionsStyles.module.css';
 import Skeleton from 'react-loading-skeleton';
 import Image from 'next/image';
+import toast from './Toast';
+import { TypeOptions } from 'react-toastify';
 
 type Params = {
 	action: ActionPublic;
@@ -18,12 +20,34 @@ const Action = ({
 	cooldowns,
 	ownedItems,
 }: Params) => {
+	const notify = React.useCallback(
+		(type: TypeOptions, message: string, title: string) => {
+			toast({ type, message, title });
+		},
+		[]
+	);
+
 	const cooldown = cooldowns.get(action.id);
 
 	const workable =
 		(!cooldown || cooldown >= new Date()) &&
-		action.required_items.find((i) => !ownedItems.find((it) => it.id === i));
+		!action.required_items.find((i) => !ownedItems.find((it) => it.id === i));
 
+	const onAct = async () => {
+		const data = await fetch(`/api/actions/${action.category}/${action.id}`, {
+			method: 'POST',
+		});
+		const res = await data.json();
+		console.log(res);
+
+		notify(res.success ? 'success' : 'error', res.message, action.name);
+
+		// if(!res.success && !res.fail) {
+
+		// }
+	};
+
+	console.log(`${action.name} is workable: ${workable}`);
 	return (
 		<div className={`${styles.action}`}>
 			<div>
@@ -76,7 +100,11 @@ const Action = ({
 				</div>
 			</div>
 			<div className={`${styles.buttonDiv}`}>
-				<button className={`${styles.button}`} disabled={!workable}>
+				<button
+					className={`${styles.button}`}
+					disabled={!workable}
+					onClick={onAct}
+				>
 					{action?.category ? action.category[0].toUpperCase() : ''}
 					{action?.category?.slice(1)}
 				</button>

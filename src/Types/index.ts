@@ -1,4 +1,5 @@
 export * from './ActionGroup';
+export * from './ActionGroupPrivate';
 export * from './ActionPrivate';
 export * from './ActionPublic';
 export * from './Currency';

@@ -10,6 +10,7 @@
 .overflow {
 	overflow: hidden;
 	gap: 0px;
+	margin-bottom: 20px;
 }
 
 .actionGroup {

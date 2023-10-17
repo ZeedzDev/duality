@@ -1,6 +1,6 @@
-import { ActionGroup } from '@/Types/';
+import { ActionGroup } from '@/Types';
 
-export async function GET() {
+export function GET(req: Request) {
 	return Response.json({ actions });
 }
 
