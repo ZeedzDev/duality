@@ -1,10 +1,12 @@
-import { ActionPublic, Item, OwnedItem } from '@/Types';
+import { ActionPublic, Currency, Item, OwnedItem } from '@/Types';
 import * as React from 'react';
 import styles from '../Styles/ActionsStyles.module.css';
 import Skeleton from 'react-loading-skeleton';
 import Image from 'next/image';
 import toast from './Toast';
 import { TypeOptions } from 'react-toastify';
+import { coinsContext, ownedItemsContext, pointsContext } from '@/Context';
+import { addOwnedItem } from '@/Utils';
 
 type Params = {
 	action: ActionPublic;
@@ -13,39 +15,101 @@ type Params = {
 	cooldowns: Map<string, Date>;
 	ownedItems: OwnedItem[];
 };
-const Action = ({
-	action,
-	itemsData,
-	itemsIsLoading,
-	cooldowns,
-	ownedItems,
-}: Params) => {
-	const notify = React.useCallback(
-		(type: TypeOptions, message: string, title: string) => {
-			toast({ type, message, title });
-		},
-		[]
-	);
+const Action = ({ action, itemsData, itemsIsLoading, cooldowns }: Params) => {
+	const coins = React.useContext(coinsContext),
+		points = React.useContext(pointsContext),
+		ownedItems = React.useContext(ownedItemsContext),
+		notify = React.useCallback(
+			(type: TypeOptions, message: string, title: string) => {
+				toast({ type, message, title });
+			},
+			[]
+		),
+		cooldown = cooldowns.get(action.id),
+		workable =
+			(!cooldown || cooldown >= new Date()) &&
+			!action.required_items.find(
+				(i) => !ownedItems.items.find((it) => it.id === i)
+			),
+		onAct = async () => {
+			const data = await fetch(`/api/actions/${action.category}/${action.id}`, {
+				body: JSON.stringify({
+					coins: coins.coins,
+					inventory: ownedItems.items,
+					points: points.points,
+				}),
+				method: 'POST',
+			});
+			const res: {
+				error?: string;
+				code?: number;
+				message?: string;
+				success?: boolean;
+				fail?: boolean;
+				newItems?: OwnedItem[];
+				points?: number;
+				coins?: number;
+				loot?: { id: string; quantity: number };
+			} = await data.json();
+			console.log(res);
 
-	const cooldown = cooldowns.get(action.id);
+			if (res.error)
+				return notify(
+					'error',
+					'There was an error in executing the request',
+					action.name
+				);
 
-	const workable =
-		(!cooldown || cooldown >= new Date()) &&
-		!action.required_items.find((i) => !ownedItems.find((it) => it.id === i));
+			if (res.success && res.loot) {
+				const loot: { id: string; quantity: number } = res.loot;
+				let lootItem: Item | undefined;
+				let icon = '';
+				if (loot.id === Currency.MONEY) {
+					icon = process.env.NEXT_PUBLIC_CURRENCY_MONEY || '$';
+					coins.setCoins(coins.coins + loot.quantity);
+				} else if (loot.id === Currency.POINTS) {
+					icon = process.env.NEXT_PUBLIC_CURRENCY_POINTS || '🔥';
+					points.setPoints(points.points + loot.quantity);
+				} else {
+					lootItem = itemsData?.find((i) => i.id === loot.id);
+					if (lootItem) {
+						if (ownedItems.items.find((i) => i.id === lootItem?.id)) {
+							ownedItems.setOwnedItems(
+								ownedItems.items.map((i) =>
+									i.id === lootItem?.id
+										? { ...i, quantity: i.quantity + loot.quantity }
+										: i
+								)
+							);
+						} else {
+							ownedItems.setOwnedItems([
+								...ownedItems.items,
+								{ ...lootItem, quantity: loot.quantity },
+							]);
+						}
+					}
+				}
+				return notify(
+					'success',
+					res.message?.replaceAll(
+						'{loot}',
+						`${icon}${loot.quantity}${
+							lootItem?.name ? ` ${lootItem.name}` : ''
+						}`
+					) || 'Yay!',
+					action.name
+				);
+			} else
+				return notify(
+					res.success ? 'success' : 'error',
+					res.message || 'Yes,.',
+					action.name
+				);
 
-	const onAct = async () => {
-		const data = await fetch(`/api/actions/${action.category}/${action.id}`, {
-			method: 'POST',
-		});
-		const res = await data.json();
-		console.log(res);
+			// if(!res.success && !res.fail) {
 
-		notify(res.success ? 'success' : 'error', res.message, action.name);
-
-		// if(!res.success && !res.fail) {
-
-		// }
-	};
+			// }
+		};
 
 	console.log(`${action.name} is workable: ${workable}`);
 	return (

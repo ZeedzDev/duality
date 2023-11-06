@@ -1,5 +1,7 @@
-import { ActionGroupPrivate, Currency } from '@/Types';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { ActionGroupPrivate, Currency, OwnedItem } from '@/Types';
+
+const POINTS_MAX_TO_LOSE = 15000;
+const COINS_MAX_TO_LOSE = 7000;
 
 type Params = {
 	action: string;
@@ -7,6 +9,8 @@ type Params = {
 };
 
 export async function POST(req: Request, context: { params: Params }) {
+	const body: { coins: number; points: number; inventory: OwnedItem[] } =
+		await req.json();
 	const A = context.params.action,
 		AG = context.params.actionGroup;
 
@@ -25,7 +29,10 @@ export async function POST(req: Request, context: { params: Params }) {
 		return Response.json({ error: 'Action not found.' }, { status: 404 });
 
 	if (action.onAction) {
-		const res = await action.onAction({ balance: [0, 1], items: [] });
+		const res = await action.onAction({
+			balance: [body.coins, body.points],
+			items: body.inventory,
+		});
 		return Response.json({ code: 200, res }, { status: 200 });
 	}
 
@@ -33,12 +40,53 @@ export async function POST(req: Request, context: { params: Params }) {
 		success = Math.random() < action.success_rate;
 
 	if (fail) {
+		/* Possible outcomes:
+			- Lose one of the 'required items' (low chance) 0.2
+			- Lose random amount of points  - 0.3
+			- lose random amount of money - 0.3
+			- lose all money - 0.1
+			- lose all points - 0.1
+		*/
+		const failNumber = Math.random();
+		let newItems = body.inventory || [],
+			points = body.points,
+			coins = body.coins;
+		if (failNumber < 0.2) {
+			const requiredItems = action.required_items;
+			const itemToRemove =
+				requiredItems[Math.floor(Math.random() * requiredItems.length)];
+			// Remove item from user's inventory
+			const existingItem = newItems.find((i) => i.id === itemToRemove);
+			if (existingItem)
+				if (existingItem.quantity <= 1) {
+					newItems = newItems.filter((i) => i.id !== itemToRemove);
+				} else
+					newItems = newItems.map((i) =>
+						i.id === itemToRemove ? { ...i, quantity: i.quantity - 1 } : i
+					);
+		} else if (failNumber < 0.5) {
+			const pointsToRemove = Math.floor(
+				Math.random() * Math.min(points, POINTS_MAX_TO_LOSE)
+			);
+			points -= pointsToRemove;
+		} else if (failNumber < 0.8) {
+			const coinsToRemove = Math.floor(
+				Math.random() * Math.min(coins, COINS_MAX_TO_LOSE)
+			);
+			coins -= coinsToRemove;
+		} else if (failNumber < 0.9) {
+			coins = 0;
+		}
+
 		return Response.json(
 			{
 				code: 200,
 				message: 'You failed to complete the action.',
 				success: false,
 				fail: true,
+				newItems,
+				points,
+				coins,
 			},
 			{ status: 200 }
 		);
@@ -49,12 +97,13 @@ export async function POST(req: Request, context: { params: Params }) {
 			quantity = Math.floor(
 				Math.random() * (loot.loot_range[1] - loot.loot_range[0]) +
 					loot.loot_range[0]
-			);
+			),
+			lootMessage = 'You earned {loot}!';
 
 		return Response.json(
 			{
 				code: 200,
-				message: 'You completed the action!',
+				message: lootMessage,
 				success: true,
 				fail: false,
 				loot: {
@@ -68,7 +117,7 @@ export async function POST(req: Request, context: { params: Params }) {
 		return Response.json(
 			{
 				code: 200,
-				message: 'You missed!',
+				message: "Unlucky, you didn't earn anything.",
 				success: false,
 				fail: false,
 			},
