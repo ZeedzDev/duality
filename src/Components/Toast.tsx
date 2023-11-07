@@ -18,7 +18,7 @@ const ToastMessage = ({
 		</div>,
 		{
 			type,
-			autoClose: false,
+			autoClose: 5000,
 			position: 'bottom-left',
 		}
 	);
