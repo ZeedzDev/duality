@@ -5,8 +5,10 @@ import Skeleton from 'react-loading-skeleton';
 import Image from 'next/image';
 import toast from './Toast';
 import { TypeOptions } from 'react-toastify';
-import { coinsContext, ownedItemsContext, pointsContext } from '@/Context';
-import { addOwnedItem } from '@/Utils';
+import {
+	balanceContext as balanceContextProvider,
+	ownedItemsContext,
+} from '@/Context';
 
 type Params = {
 	action: ActionPublic;
@@ -16,8 +18,7 @@ type Params = {
 	ownedItems: OwnedItem[];
 };
 const Action = ({ action, itemsData, itemsIsLoading, cooldowns }: Params) => {
-	const coins = React.useContext(coinsContext),
-		points = React.useContext(pointsContext),
+	const balance = React.useContext(balanceContextProvider),
 		ownedItems = React.useContext(ownedItemsContext),
 		notify = React.useCallback(
 			(type: TypeOptions, message: string, title: string) => {
@@ -25,18 +26,20 @@ const Action = ({ action, itemsData, itemsIsLoading, cooldowns }: Params) => {
 			},
 			[]
 		),
-		cooldown = cooldowns.get(action.id),
+		[onCooldown, setOnCooldown] = React.useState(false),
 		workable =
-			(!cooldown || cooldown >= new Date()) &&
+			!onCooldown &&
 			!action.required_items.find(
 				(i) => !ownedItems.items.find((it) => it.id === i)
 			),
 		onAct = async () => {
+			setOnCooldown(true);
+			setTimeout(() => setOnCooldown(false), action.cooldown * 1000);
 			const data = await fetch(`/api/actions/${action.category}/${action.id}`, {
 				body: JSON.stringify({
-					coins: coins.coins,
+					coins: balance.balance[0],
 					inventory: ownedItems.items,
-					points: points.points,
+					points: balance.balance[1],
 				}),
 				method: 'POST',
 			});
@@ -50,6 +53,7 @@ const Action = ({ action, itemsData, itemsIsLoading, cooldowns }: Params) => {
 				points?: number;
 				coins?: number;
 				loot?: { id: string; quantity: number };
+				removedItem?: string;
 			} = await data.json();
 			console.log(res);
 
@@ -66,10 +70,16 @@ const Action = ({ action, itemsData, itemsIsLoading, cooldowns }: Params) => {
 				let icon = '';
 				if (loot.id === Currency.MONEY) {
 					icon = process.env.NEXT_PUBLIC_CURRENCY_MONEY || '$';
-					coins.setCoins(coins.coins + loot.quantity);
+					balance.setBalance([
+						balance.balance[0] + loot.quantity,
+						balance.balance[1],
+					]);
 				} else if (loot.id === Currency.POINTS) {
 					icon = process.env.NEXT_PUBLIC_CURRENCY_POINTS || '🔥';
-					points.setPoints(points.points + loot.quantity);
+					balance.setBalance([
+						balance.balance[0],
+						balance.balance[1] + loot.quantity,
+					]);
 				} else {
 					lootItem = itemsData?.find((i) => i.id === loot.id);
 					if (lootItem) {
@@ -99,19 +109,53 @@ const Action = ({ action, itemsData, itemsIsLoading, cooldowns }: Params) => {
 					) || 'Yay!',
 					action.name
 				);
-			} else
+			} else if (!res.success && res.fail) {
+				let changed = {
+					coins: false,
+					points: false,
+					newItems: res.removedItem || false,
+				};
+				if (res.coins !== balance.balance[0]) changed.coins = true;
+				if (res.points !== balance.balance[1]) changed.points = true;
+				if (res.removedItem) changed.newItems = true;
+
+				balance.setBalance([
+					typeof res.coins === 'number' ? res.coins : balance.balance[0],
+					typeof res.points === 'number' ? res.points : balance.balance[1],
+				]);
+
+				if (changed.newItems)
+					ownedItems.setOwnedItems(res.newItems || ownedItems.items);
+
+				let removedMessage = '';
+				// Replace 'lost' with how many points, coins, and items were lost
+				if (changed.coins)
+					removedMessage += ` ${balance.balance[0] - (res.coins || 0)} coins`;
+				if (changed.points)
+					removedMessage += ` ${balance.balance[1] - (res.points || 0)} points`;
+				if (changed.newItems)
+					removedMessage += ` a ${
+						itemsData?.find((i) => i.id === res.removedItem)?.name ||
+						res.removedItem
+					}`;
+
 				return notify(
-					res.success ? 'success' : 'error',
-					res.message || 'Yes,.',
+					'error',
+					res.message?.replace(
+						'{lost}',
+						removedMessage.length ? removedMessage : '... nothing!'
+					) || 'Unlucky.',
 					action.name
 				);
-
-			// if(!res.success && !res.fail) {
-
-			// }
+			} else if (!res.success && !res.fail) {
+				return notify(
+					'warning',
+					res.message || 'You just got unlucky. Nothing happened.',
+					action.name
+				);
+			}
 		};
 
-	console.log(`${action.name} is workable: ${workable}`);
 	return (
 		<div className={`${styles.action}`}>
 			<div>

@@ -1,8 +1,7 @@
 'use client';
-
 import * as React from 'react';
 import OwnedItems from '@/Components/OwnedItems';
-import { Currency, ItemType, OwnedItem } from '@/Types';
+import { OwnedItem } from '@/Types';
 import styles from './page.module.css';
 import Balance from '@/Components/Balance';
 import Shop from '@/Components/Shop';
@@ -10,16 +9,18 @@ import Actions from '@/Components/Actions';
 import { HotKeys } from 'react-hotkeys';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { coinsContext, ownedItemsContext, pointsContext } from '@/Context';
+import { ownedItemsContext, balanceContext } from '@/Context';
+import { useCountdown } from '@/Utils';
 
 export default function Play() {
 	const [ownedItems, setOwnedItems] = React.useState<OwnedItem[]>([]);
-	const [balance, setBalance] = React.useState<number[]>([10000, 0]);
+	const [balance, setBalance] = React.useState<number[]>([0, 0]);
 
 	const ownedItemsRef = React.useRef<HTMLInputElement>(null);
 	const shopRef = React.useRef<HTMLInputElement>(null);
 	const actionsRef = React.useRef<HTMLInputElement>(null);
 
+	const { secondsLeft, start } = useCountdown();
 	const keyMap = {
 		SEARCH_OWNED_ITEMS: 'ctrl+o',
 		SEARCH_SHOP: 'ctrl+s',
@@ -50,54 +51,72 @@ export default function Play() {
 
 	const cooldowns = new Map<string, Date>();
 
+	if (secondsLeft === 0) {
+		return (
+			<>
+				<balanceContext.Provider value={{ balance: balance, setBalance }}>
+					<ownedItemsContext.Provider
+						value={{ items: ownedItems, setOwnedItems }}
+					>
+						<div className={`bg ${styles.playPage}`}>
+							<Balance
+								{...{ playStyles: styles, secondsLeft, start, setOwnedItems }}
+							/>
+							<OwnedItems
+								{...{
+									ownedItems,
+									playStyles: styles,
+									balance,
+									setOwnedItems,
+									setBalance,
+									secondsLeft,
+								}}
+							/>
+						</div>
+					</ownedItemsContext.Provider>
+				</balanceContext.Provider>
+			</>
+		);
+	}
+
 	return (
 		<>
 			<HotKeys keyMap={keyMap} handlers={handlers} allowChanges>
-				<coinsContext.Provider
-					value={{
-						coins: balance[0],
-						setCoins: (coins) => setBalance([coins, balance[1]]),
-					}}
-				>
-					<pointsContext.Provider
-						value={{
-							points: balance[1],
-							setPoints: (points) => setBalance([balance[0], points]),
-						}}
+				<balanceContext.Provider value={{ balance: balance, setBalance }}>
+					<ownedItemsContext.Provider
+						value={{ items: ownedItems, setOwnedItems }}
 					>
-						<ownedItemsContext.Provider
-							value={{ items: ownedItems, setOwnedItems }}
-						>
-							<div className={`bg ${styles.playPage}`}>
-								<Balance {...{ balance, playStyles: styles }} />
-								<OwnedItems
-									ref={ownedItemsRef}
-									{...{
-										ownedItems,
-										playStyles: styles,
-										balance,
-										setOwnedItems,
-										setBalance,
-									}}
-								/>
-								<Shop
-									ref={shopRef}
-									{...{
-										playStyles: styles,
-										balance,
-										setOwnedItems,
-										ownedItems,
-										setBalance,
-									}}
-								/>
-								<Actions
-									ref={actionsRef}
-									{...{ playStyles: styles, ownedItems, cooldowns }}
-								/>
-							</div>
-						</ownedItemsContext.Provider>
-					</pointsContext.Provider>
-				</coinsContext.Provider>
+						<div className={`bg ${styles.playPage}`}>
+							<Balance
+								{...{ playStyles: styles, secondsLeft, start, setOwnedItems }}
+							/>
+							<OwnedItems
+								ref={ownedItemsRef}
+								{...{
+									ownedItems,
+									playStyles: styles,
+									balance,
+									setOwnedItems,
+									setBalance,
+								}}
+							/>
+							<Shop
+								ref={shopRef}
+								{...{
+									playStyles: styles,
+									balance,
+									setOwnedItems,
+									ownedItems,
+									setBalance,
+								}}
+							/>
+							<Actions
+								ref={actionsRef}
+								{...{ playStyles: styles, ownedItems, cooldowns }}
+							/>
+						</div>
+					</ownedItemsContext.Provider>
+				</balanceContext.Provider>
 			</HotKeys>
 			<ToastContainer
 				position='bottom-left'

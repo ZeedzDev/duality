@@ -85,7 +85,7 @@ const actions: ActionGroup[] = [
 				description: "Woah?! Let's hope you're good...",
 				category: 'fish',
 				cooldown: 30,
-				required_items: ['speargun'],
+				required_items: ['spear_gun'],
 			},
 		],
 	},

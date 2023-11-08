@@ -4,15 +4,15 @@ import styles from '../Styles/ActionsStyles.module.css';
 import SearchPill from './SearchPill';
 import Skeleton from 'react-loading-skeleton';
 import useSWR from 'swr';
-import { ActionGroup, OwnedItem } from '@/Types';
+import { ActionGroup } from '@/Types';
 import ActionGroupComponent from './ActionGroup';
+import { Filters, FiltersContext, ownedItemsContext } from '@/Context';
 
 type Params = {
 	playStyles: {
 		readonly [key: string]: string;
 	};
 	cooldowns: Map<string, Date>;
-	ownedItems: OwnedItem[];
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -20,11 +20,13 @@ const actionsFetched = (url: string) => fetcher(url).then((res) => res.actions);
 const itemsFetched = (url: string) => fetcher(url).then((res) => res.items);
 
 const Actions = React.forwardRef<HTMLInputElement, Params>(
-	({ playStyles, cooldowns, ownedItems }, ref) => {
+	({ playStyles, cooldowns }, ref) => {
 		const itemsSWR = useSWR(`/api/items`, itemsFetched);
 		const itemsData = itemsSWR.data;
 		const itemsError = itemsSWR.error;
 		const itemsIsLoading = itemsSWR.isLoading;
+		const [filters, setFilters] = React.useState<Filters[]>([]);
+		const ownedItems = React.useContext(ownedItemsContext);
 
 		const { data, error, isLoading } = useSWR('/api/actions', actionsFetched);
 
@@ -34,15 +36,26 @@ const Actions = React.forwardRef<HTMLInputElement, Params>(
 			React.useState<ActionGroup[]>(data);
 		React.useEffect(() => {
 			setFilteredActions(
-				data?.filter(
-					(action: ActionGroup) =>
-						action.name.toLowerCase().includes(search.toLowerCase()) ||
-						action.actions.filter((action) =>
-							action.name.toLowerCase().includes(search.toLowerCase())
-						).length
+				// Goes through action groups
+				data?.filter((action: ActionGroup) =>
+					// checks if available filter is enabled
+					filters.includes('available')
+						? // goes through actions within the action group
+						  action.name.toLowerCase().includes(search.toLowerCase()) ||
+						  action.actions.filter(
+								(action) =>
+									action.name.toLowerCase().includes(search.toLowerCase()) &&
+									ownedItems.items.filter((ownedItem) =>
+										action.required_items.includes(ownedItem.id)
+									).length === action.required_items.length
+						  ).length
+						: action.name.toLowerCase().includes(search.toLowerCase()) ||
+						  action.actions.filter((action) =>
+								action.name.toLowerCase().includes(search.toLowerCase())
+						  ).length
 				)
 			);
-		}, [search, data]);
+		}, [search, data, filters, ownedItems]);
 
 		if (itemsError)
 			return (
@@ -75,32 +88,51 @@ const Actions = React.forwardRef<HTMLInputElement, Params>(
 		if (error) return <div>Failed to load</div>;
 
 		return (
-			<div
-				className={`fg ${playStyles.section} ${styles.actionsContainer} ${styles.overflow}`}
-			>
-				<SearchPill
-					value={search}
-					setValue={setSearch}
-					placeholder='Search for actions'
-					ref={ref}
-				/>
-				<div className={`${styles.actionsContainer}`}>
-					{filteredActions?.map((actionGroup) => (
-						<div key={`actions_${actionGroup.id}`}>
-							<ActionGroupComponent
-								{...{
-									actionGroup,
-									search,
-									itemsData,
-									itemsIsLoading,
-									cooldowns,
-									ownedItems,
-								}}
-							/>
+			<FiltersContext.Provider value={filters}>
+				<div
+					className={`fg ${playStyles.section} ${styles.actionsContainer} ${styles.overflow}`}
+				>
+					<SearchPill
+						value={search}
+						setValue={setSearch}
+						placeholder='Search for actions'
+						ref={ref}
+					/>
+					<div className={styles.filterPillRow}>
+						<div
+							className={`${
+								filters.includes('available') ? styles.filterPillEnabled : ''
+							} ${styles.filterPill}`}
+							onClick={() => {
+								if (filters.includes('available')) {
+									setFilters(
+										filters.filter((filter) => filter !== 'available')
+									);
+								} else {
+									setFilters(['available']);
+								}
+							}}
+						>
+							Available
 						</div>
-					))}
+					</div>
+					<div className={`${styles.actionsContainer}`}>
+						{filteredActions?.map((actionGroup) => (
+							<div key={`actions_${actionGroup.id}`}>
+								<ActionGroupComponent
+									{...{
+										actionGroup,
+										search,
+										itemsData,
+										itemsIsLoading,
+										cooldowns,
+									}}
+								/>
+							</div>
+						))}
+					</div>
 				</div>
-			</div>
+			</FiltersContext.Provider>
 		);
 	}
 );

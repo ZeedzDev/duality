@@ -22,7 +22,6 @@ export const addOwnedItem = ({
 	subtractCost({ item, balance, setBalance });
 
 	if (ownedItems.find((i) => i.id === item.id)) {
-		console.log('here');
 		return setOwnedItems(
 			ownedItems.map((i) =>
 				i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i

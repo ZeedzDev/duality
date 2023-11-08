@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { Currency, OwnedItem } from '@/Types/index';
+import { OwnedItem } from '@/Types/index';
 import SearchPill from './SearchPill';
-import Image from 'next/image';
 import styles from '../Styles/OwnedItemsStyles.module.css';
 import ItemComponent from './Item';
 
@@ -11,10 +10,14 @@ type OwnedItemsProps = {
 	balance: number[];
 	setBalance: React.Dispatch<React.SetStateAction<number[]>>;
 	setOwnedItems: React.Dispatch<React.SetStateAction<OwnedItem[]>>;
+	secondsLeft?: number;
 };
 
 const OwnedItems = React.forwardRef<HTMLInputElement, OwnedItemsProps>(
-	({ ownedItems, playStyles, balance, setBalance, setOwnedItems }, ref) => {
+	(
+		{ ownedItems, playStyles, balance, setBalance, setOwnedItems, secondsLeft },
+		ref
+	) => {
 		const [search, setSearch] = React.useState<string>('');
 
 		const [filteredItems, setFilteredItems] =
@@ -48,12 +51,12 @@ const OwnedItems = React.forwardRef<HTMLInputElement, OwnedItemsProps>(
 							<ItemComponent
 								{...{
 									item: ownedItem,
-									playStyles,
 									type: 'owned',
 									balance,
 									ownedItems,
 									setBalance,
 									setOwnedItems,
+									actionable: secondsLeft !== 0,
 								}}
 							/>
 						</div>

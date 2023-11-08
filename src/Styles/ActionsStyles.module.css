@@ -215,3 +215,39 @@
 	overflow: visible;
 	width: 25%;
 }
+
+.filterPillRow {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+	padding-top: 10px;
+}
+
+.filterPill {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 5px;
+	padding: 5px 10px;
+	border-radius: 15px;
+	background-color: var(--bg-bg-color);
+	color: var(--bg-color);
+	border: 1px solid var(--bg-color);
+	-webkit-border-radius: 15px;
+	-moz-border-radius: 15px;
+	-ms-border-radius: 15px;
+	-o-border-radius: 15px;
+	transition: all 0.1s ease-in-out;
+	-webkit-transition: all 0.1s ease-in-out;
+	-moz-transition: all 0.1s ease-in-out;
+	-ms-transition: all 0.1s ease-in-out;
+	-o-transition: all 0.1s ease-in-out;
+	cursor: pointer;
+}
+
+.filterPillEnabled {
+	background-color: var(--primary-bg-color);
+	color: var(--primary-color);
+	border: 1px solid var(--primary-bg-color);
+}

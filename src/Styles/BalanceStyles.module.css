@@ -12,3 +12,14 @@
 .balance > :first-child {
 	margin-right: 1em !important;
 }
+
+.button {
+	width: 100%;
+	padding: 15px;
+	border-radius: 5px;
+	background-color: var(--primary-bg-color);
+	color: var(--primary-color);
+	text-align: center;
+	border: none;
+	cursor: pointer;
+}

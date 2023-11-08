@@ -47,6 +47,7 @@ export async function POST(req: Request, context: { params: Params }) {
 			- lose all money - 0.1
 			- lose all points - 0.1
 		*/
+		let removedItem: string | undefined;
 		const failNumber = Math.random();
 		let newItems = body.inventory || [],
 			points = body.points,
@@ -55,6 +56,7 @@ export async function POST(req: Request, context: { params: Params }) {
 			const requiredItems = action.required_items;
 			const itemToRemove =
 				requiredItems[Math.floor(Math.random() * requiredItems.length)];
+			removedItem = itemToRemove;
 			// Remove item from user's inventory
 			const existingItem = newItems.find((i) => i.id === itemToRemove);
 			if (existingItem)
@@ -74,19 +76,22 @@ export async function POST(req: Request, context: { params: Params }) {
 				Math.random() * Math.min(coins, COINS_MAX_TO_LOSE)
 			);
 			coins -= coinsToRemove;
-		} else if (failNumber < 0.9) {
+		} else if (failNumber < 0.96) {
 			coins = 0;
+		} else if (failNumber < 1) {
+			points = 0;
 		}
 
 		return Response.json(
 			{
 				code: 200,
-				message: 'You failed to complete the action.',
+				message: 'Unlucky, you failed, losing you{lost}.',
 				success: false,
 				fail: true,
 				newItems,
 				points,
 				coins,
+				removedItem,
 			},
 			{ status: 200 }
 		);
@@ -279,7 +284,7 @@ const ActionGroups: ActionGroupPrivate[] = [
 				description: "Woah?! Let's hope you're good...",
 				category: 'fish',
 				cooldown: 30,
-				required_items: ['speargun'],
+				required_items: ['spear_gun'],
 				success_rate: 0.3,
 				fail_rate: 0.3,
 				loot: [

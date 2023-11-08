@@ -6,22 +6,22 @@ import { addOwnedItem, itemBuyable, sellOwnedItem } from '@/Utils';
 
 type Params = {
 	item: Item | OwnedItem;
-	playStyles: { readonly [key: string]: string };
 	type: 'owned' | 'shop';
 	balance: number[];
 	setBalance: React.Dispatch<React.SetStateAction<number[]>>;
 	setOwnedItems: React.Dispatch<React.SetStateAction<OwnedItem[]>>;
 	ownedItems: OwnedItem[];
+	actionable?: boolean;
 };
 
 const ItemComponent = ({
 	item,
-	playStyles,
 	type,
 	balance,
 	setBalance,
 	setOwnedItems,
 	ownedItems,
+	actionable,
 }: Params) => {
 	const buyable = itemBuyable({ item, balance });
 
@@ -51,30 +51,34 @@ const ItemComponent = ({
 					{'quantity' in item && <p>{item.quantity} owned</p>}
 				</div>
 			</div>
-			<div className={`${styles.buttonGroup}`}>
-				{type === 'owned' && (
-					<button
-						className={`${styles.button} ${styles.sellButton}`}
-						onClick={onSell}
-					>
-						{item.currency === Currency.MONEY
-							? process.env.NEXT_PUBLIC_CURRENCY_MONEY
-							: process.env.NEXT_PUBLIC_CURRENCY_POINTS}
-						{item.sell}
-					</button>
-				)}
-				<button
-					disabled={!buyable}
-					aria-disabled={!buyable}
-					className={`${styles.button} ${styles.buyButton}`}
-					onClick={onBuy}
-				>
-					{item.currency === Currency.MONEY
-						? process.env.NEXT_PUBLIC_CURRENCY_MONEY
-						: process.env.NEXT_PUBLIC_CURRENCY_POINTS}
-					{item.buy}
-				</button>
-			</div>
+			{actionable !== false && (
+				<div className={`${styles.buttonGroup}`}>
+					{type === 'owned' && item.sell > 0 && (
+						<button
+							className={`${styles.button} ${styles.sellButton}`}
+							onClick={onSell}
+						>
+							{item.currency === Currency.MONEY
+								? process.env.NEXT_PUBLIC_CURRENCY_MONEY
+								: process.env.NEXT_PUBLIC_CURRENCY_POINTS}
+							{item.sell}
+						</button>
+					)}
+					{item.buy > 0 && (
+						<button
+							disabled={!buyable}
+							aria-disabled={!buyable}
+							className={`${styles.button} ${styles.buyButton}`}
+							onClick={onBuy}
+						>
+							{item.currency === Currency.MONEY
+								? process.env.NEXT_PUBLIC_CURRENCY_MONEY
+								: process.env.NEXT_PUBLIC_CURRENCY_POINTS}
+							{item.buy}
+						</button>
+					)}
+				</div>
+			)}
 		</div>
 	);
 };

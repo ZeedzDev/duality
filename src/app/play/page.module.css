@@ -9,6 +9,7 @@
 .section {
 	display: flex;
 	flex-direction: column;
+	gap: 10px;
 	padding: 16px;
 	border-radius: 19px;
 	-webkit-border-radius: 19px;

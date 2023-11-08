@@ -30,8 +30,9 @@ const Shop = React.forwardRef<HTMLInputElement, Params>(
 			setFilteredItems(
 				data?.filter(
 					(item: Item) =>
-						item.name.toLowerCase().includes(search.toLowerCase()) ||
-						item.type.toLowerCase().includes(search.toLowerCase())
+						(item.name.toLowerCase().includes(search.toLowerCase()) ||
+							item.type.toLowerCase().includes(search.toLowerCase())) &&
+						item.buy
 				)
 			);
 		}, [search, data]);

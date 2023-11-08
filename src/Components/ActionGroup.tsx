@@ -1,7 +1,8 @@
-import { ActionGroup as ActionGroupType, Item, OwnedItem } from '@/Types';
+import { ActionGroup as ActionGroupType, Item } from '@/Types';
 import * as React from 'react';
 import styles from '../Styles/ActionsStyles.module.css';
 import Action from './Action';
+import { FiltersContext, ownedItemsContext } from '@/Context';
 
 type Params = {
 	actionGroup: ActionGroupType;
@@ -9,7 +10,6 @@ type Params = {
 	itemsData?: Item[];
 	itemsIsLoading: boolean;
 	cooldowns: Map<string, Date>;
-	ownedItems: OwnedItem[];
 };
 
 const ActionGroupComponent = ({
@@ -18,14 +18,15 @@ const ActionGroupComponent = ({
 	itemsData,
 	itemsIsLoading,
 	cooldowns,
-	ownedItems,
 }: Params) => {
 	const [collapsed, setCollapsed] = React.useState(true);
+	const ownedItems = React.useContext(ownedItemsContext).items;
+	const filters = React.useContext(FiltersContext);
 
 	React.useEffect(() => {
-		if (search.length) setCollapsed(false);
+		if (search.length || filters.length) setCollapsed(false);
 		else setCollapsed(true);
-	}, [search]);
+	}, [search, filters]);
 
 	return (
 		<div className={`${styles.actionGroup}`}>
@@ -44,10 +45,41 @@ const ActionGroupComponent = ({
 				>
 					{search.length
 						? actionGroup.actions
+								.filter((action) => {
+									const inSearch =
+										action.category?.toLowerCase().includes(search) ||
+										action.name.toLowerCase().includes(search.toLowerCase());
+									const availableFilterEnabled = filters.includes('available');
+									const availableFilter = availableFilterEnabled
+										? ownedItems.filter((item) =>
+												action.required_items.includes(item.id)
+										  ).length === action.required_items.length
+										: true;
+									if (inSearch && availableFilterEnabled && availableFilter)
+										return true;
+									if (inSearch && !availableFilterEnabled) return true;
+									else return false;
+								})
+								.map((action) => (
+									<div key={`action_${actionGroup.id}_${action.id}`}>
+										<Action
+											{...{
+												action,
+												itemsData,
+												itemsIsLoading,
+												cooldowns,
+												ownedItems,
+											}}
+										/>
+									</div>
+								))
+						: filters.includes('available')
+						? actionGroup.actions
 								.filter(
 									(action) =>
-										action.category?.toLowerCase().includes(search) ||
-										action.name.toLowerCase().includes(search.toLowerCase())
+										ownedItems.filter((item) =>
+											action.required_items.includes(item.id)
+										).length === action.required_items.length
 								)
 								.map((action) => (
 									<div key={`action_${actionGroup.id}_${action.id}`}>
