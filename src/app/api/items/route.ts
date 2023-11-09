@@ -176,4 +176,13 @@ const items: Item[] = [
 		currency: Currency.POINTS,
 		iconUrl: '/icons/items/whale.png',
 	},
+	{
+		id: 'boar',
+		name: 'Wild Boar',
+		type: ItemType.COLLECTABLE,
+		buy: 0,
+		sell: 500,
+		currency: Currency.POINTS,
+		iconUrl: '/icons/items/boar.png',
+	},
 ];
