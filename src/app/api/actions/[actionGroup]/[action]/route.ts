@@ -301,7 +301,7 @@ const ActionGroups: ActionGroupPrivate[] = [
 						loot_range: [2, 4],
 					},
 					{
-						loot_id: 'Whale',
+						loot_id: 'whale',
 						loot_range: [1, 1],
 					},
 				],
