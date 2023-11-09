@@ -159,6 +159,15 @@ const items: Item[] = [
 		iconUrl: '/icons/items/spear_gun.png',
 	},
 	{
+		id: 'cool_fish',
+		name: 'Cool Fish',
+		type: ItemType.COLLECTABLE,
+		buy: 0,
+		sell: 200,
+		currency: Currency.POINTS,
+		iconUrl: '/icons/items/cool_fish.png',
+	},
+	{
 		id: 'whale',
 		name: 'Whale',
 		type: ItemType.COLLECTABLE,
