@@ -9,6 +9,8 @@ import {
 	balanceContext as balanceContextProvider,
 	ownedItemsContext,
 } from '@/Context';
+import { useCountdown } from '@/Utils';
+import { CircularProgress } from '@mui/material';
 
 type Params = {
 	action: ActionPublic;
@@ -25,16 +27,15 @@ const Action = ({ action, itemsData, itemsIsLoading, cooldowns }: Params) => {
 				toast({ type, message, title });
 			},
 			[]
-		),
-		[onCooldown, setOnCooldown] = React.useState(false),
-		workable =
-			!onCooldown &&
+		);
+	const { secondsLeft, start } = useCountdown();
+	const workable =
+			secondsLeft <= 0 &&
 			!action.required_items.find(
 				(i) => !ownedItems.items.find((it) => it.id === i)
 			),
 		onAct = async () => {
-			setOnCooldown(true);
-			setTimeout(() => setOnCooldown(false), action.cooldown * 1000);
+			start(action.cooldown);
 			const data = await fetch(`/api/actions/${action.category}/${action.id}`, {
 				body: JSON.stringify({
 					coins: balance.balance[0],
@@ -213,8 +214,22 @@ const Action = ({ action, itemsData, itemsIsLoading, cooldowns }: Params) => {
 					disabled={!workable}
 					onClick={onAct}
 				>
-					{action?.category ? action.category[0].toUpperCase() : ''}
-					{action?.category?.slice(1)}
+					{secondsLeft === 0 ? (
+						`${
+							action?.category ? action.category[0].toUpperCase() : ''
+						}${action?.category?.slice(1)}`
+					) : (
+						<div>
+							<CircularProgress
+								size='20px'
+								color='inherit'
+								value={
+									((action.cooldown - secondsLeft) / action.cooldown) * 100
+								}
+								variant='determinate'
+							/>
+						</div>
+					)}
 				</button>
 			</div>
 		</div>
