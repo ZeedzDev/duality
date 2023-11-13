@@ -1,21 +1,27 @@
 'use client';
 import * as React from 'react';
 import styles from '../Styles/WelcomeStyles.module.css';
-import { cookies } from 'next/headers';
 
 export const Welcome = ({ cookieWelcomed }: { cookieWelcomed: boolean }) => {
-	const [welcomed, setWelcomed] = React.useState(cookieWelcomed);
-	const [width, setWidth] = React.useState(window.innerWidth);
-
 	const largestWidth = 700;
+	const [welcomed, setWelcomed] = React.useState(cookieWelcomed);
+	const [width, setWidth] = React.useState(largestWidth);
 
 	React.useEffect(() => {
-		const handleResize = () => {
-			return setWidth(window.innerWidth);
-		};
-		window.addEventListener('resize', handleResize);
+		if (typeof window !== 'undefined') {
+			setWidth(window.innerWidth);
+		}
+	}, [setWidth]);
 
-		return () => window.removeEventListener('resize', handleResize);
+	React.useEffect(() => {
+		if (typeof window !== 'undefined') {
+			const handleResize = () => {
+				return setWidth(window.innerWidth);
+			};
+			if (window) window.addEventListener('resize', handleResize);
+
+			return () => window?.removeEventListener('resize', handleResize);
+		}
 	}, []);
 	if (cookieWelcomed) {
 		if (width < largestWidth) return <MobileView />;

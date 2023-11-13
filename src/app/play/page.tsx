@@ -3,7 +3,6 @@ import * as React from 'react';
 import OwnedItems from '@/Components/OwnedItems';
 import { OwnedItem } from '@/Types';
 import styles from './page.module.css';
-import Balance from '@/Components/Balance';
 import Shop from '@/Components/Shop';
 import Actions from '@/Components/Actions';
 import { HotKeys } from 'react-hotkeys';
@@ -11,6 +10,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ownedItemsContext, balanceContext } from '@/Context';
 import { useCountdown } from '@/Utils';
+import { Nav } from '@/Components/Nav';
 
 export default function Play() {
 	const [ownedItems, setOwnedItems] = React.useState<OwnedItem[]>([]);
@@ -58,20 +58,23 @@ export default function Play() {
 					<ownedItemsContext.Provider
 						value={{ items: ownedItems, setOwnedItems }}
 					>
-						<div className={`bg ${styles.playPage}`}>
-							<Balance
-								{...{ playStyles: styles, secondsLeft, start, setOwnedItems }}
-							/>
-							<OwnedItems
-								{...{
-									ownedItems,
-									playStyles: styles,
-									balance,
-									setOwnedItems,
-									setBalance,
-									secondsLeft,
-								}}
-							/>
+						<div
+							className={`bg`}
+							style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}
+						>
+							<Nav {...{ secondsLeft, setOwnedItems, start }} />
+							<div className={`${styles.playPage}`}>
+								<OwnedItems
+									{...{
+										ownedItems,
+										playStyles: styles,
+										balance,
+										setOwnedItems,
+										setBalance,
+										secondsLeft,
+									}}
+								/>
+							</div>
 						</div>
 					</ownedItemsContext.Provider>
 				</balanceContext.Provider>
@@ -86,34 +89,37 @@ export default function Play() {
 					<ownedItemsContext.Provider
 						value={{ items: ownedItems, setOwnedItems }}
 					>
-						<div className={`bg ${styles.playPage}`}>
-							<Balance
-								{...{ playStyles: styles, secondsLeft, start, setOwnedItems }}
-							/>
-							<OwnedItems
-								ref={ownedItemsRef}
-								{...{
-									ownedItems,
-									playStyles: styles,
-									balance,
-									setOwnedItems,
-									setBalance,
-								}}
-							/>
-							<Shop
-								ref={shopRef}
-								{...{
-									playStyles: styles,
-									balance,
-									setOwnedItems,
-									ownedItems,
-									setBalance,
-								}}
-							/>
-							<Actions
-								ref={actionsRef}
-								{...{ playStyles: styles, ownedItems, cooldowns }}
-							/>
+						<div
+							className={`bg`}
+							style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}
+						>
+							<Nav {...{ secondsLeft, setOwnedItems, start }} />
+							<div className={`${styles.playPage}`}>
+								<OwnedItems
+									ref={ownedItemsRef}
+									{...{
+										ownedItems,
+										playStyles: styles,
+										balance,
+										setOwnedItems,
+										setBalance,
+									}}
+								/>
+								<Shop
+									ref={shopRef}
+									{...{
+										playStyles: styles,
+										balance,
+										setOwnedItems,
+										ownedItems,
+										setBalance,
+									}}
+								/>
+								<Actions
+									ref={actionsRef}
+									{...{ playStyles: styles, ownedItems, cooldowns }}
+								/>
+							</div>
 						</div>
 					</ownedItemsContext.Provider>
 				</balanceContext.Provider>
