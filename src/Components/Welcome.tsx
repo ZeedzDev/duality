@@ -54,7 +54,7 @@ export const Welcome = ({ cookieWelcomed }: { cookieWelcomed: boolean }) => {
 							</div>
 							<p>Learn about the game, how it works, and the tech behind it</p>
 						</a>
-						<a href='/quick-start'>
+						<a href='https://dualitygame.notion.site/Quick-Start-Guide-Duality-64e1d0ea2e1f43d485b08496e170ca31'>
 							<div>
 								<h1>Quick Start Guide</h1>
 								<LinkArrow />
